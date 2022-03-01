@@ -234,72 +234,8 @@ type GraphContextType = {
   >;
 };
 
-type ServiceCardPropType = Required<ServiceVertexType> & StyleType;
-
-type ProductCardPropType = Required<
-  Omit<ProductVertexType, "createdAt" | "updatedAt">
-> &
-  StyleType;
-
-type HomePagePropType = {
-  products: ProductCardPropType[];
-  services: ServiceCardPropType[];
-};
-
-type ProductSectionPropType = {
-  items: ProductCardPropType[];
-  title?: ReactNode | string | null;
-} & StyleType;
-
-type ProductListPropType = {
-  items: ProductCardPropType[];
-  carousel?: boolean;
-} & StyleType;
-
-type ServiceSectionPropType = {
-  items: ServiceCardPropType[];
-  title?: ReactNode | string | null;
-} & StyleType;
-
-type ServiceListPropType = {
-  items: ServiceCardPropType[];
-} & StyleType;
-
-type ServiceLabelPropType = Omit<ServiceVertexType, "products"> & StyleType;
-
-type HomePagePropType = {
-  services: ServiceCardPropType[];
-  products: ProductType[];
-};
-
-type LayoutPropsType = {
-  children: ReactNode;
-};
-
 type AjaxFeedbackProps = {
   loading?: boolean;
   error?: any;
   text?: string;
-} & StyleType;
-
-type MoreButtonPropType = {
-  hasLazyFetched: MutableRefObject<boolean>;
-  fetchMore: any;
-  customFetch: any;
-  loading: boolean;
-  label: ReactNode | string;
-};
-
-type SortedListWithTabsPropType = {
-  tabsVariantStyle?: "pills" | "tabs";
-  field: string;
-  rendererProps?: { [k: string]: any };
-  list: { [k: string]: any }[];
-  ListRenderer: (props: any) => JSX.Element;
-} & StyleType;
-
-type OrdersOrRequestsPropType = {
-  asRequestList?: boolean;
-  title: string;
-  items: OrderVertexType[];
 } & StyleType;

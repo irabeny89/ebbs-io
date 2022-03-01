@@ -1,5 +1,3 @@
-import { ProductCardPropType } from "types";
-
 // mock images
 export const mockImages = [
   { type: "image", src: "/ferrari-f430-sport-car.jpg" },

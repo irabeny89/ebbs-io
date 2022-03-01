@@ -20,10 +20,6 @@ const {
     jwtAccessSecret,
     jwtRefreshSecret,
     nodeEnvironment,
-    ebbsEmailHost,
-    ebbsEmailPort,
-    ebbsPassword,
-    ebbsUsername,
     host,
   },
 } = config;

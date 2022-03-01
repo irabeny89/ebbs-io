@@ -501,7 +501,6 @@ const resolvers = {
         req: {
           headers: { authorization },
         },
-        res
       }: GraphContextType
     ): Promise<string | undefined> => {
       try {
@@ -511,8 +510,6 @@ const resolvers = {
           .select("_id")
           .lean()
           .exec();
-          // regenerate static home page
-          res.unstable_revalidate("/")
         return "Product deleted successfully";
       } catch (error) {
         // NOTE: log error to debug

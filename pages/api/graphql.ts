@@ -4,15 +4,25 @@ import apolloServer from "../../graphql/apollo-server";
 import appConfig from "config";
 import Cors from "micro-cors";
 
+const {
+  graphqlUri,
+  origins: [{ origin }],
+} = appConfig.environmentVariable;
 const server = apolloServer.start();
 
 export const config = { api: { bodyParser: false } };
 
 export default Cors({
   allowCredentials: true,
-  allowHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+  allowHeaders: [
+    "Origin",
+    "X-Requested-With",
+    "Content-Type",
+    "Accept",
+    "EBBS",
+  ],
   allowMethods: ["POST", "OPTIONS"],
-  origin: "http://localhost:3000/",
+  origin,
   // @ts-ignore
 })(async (req: MicroRequest, res: NextApiResponse) => {
   if (req.method === "OPTIONS") {
@@ -21,6 +31,6 @@ export default Cors({
   }
   await server;
   return await apolloServer.createHandler({
-    path: appConfig.environmentVariable.graphqlUri,
+    path: graphqlUri,
   })(req, res);
 });
