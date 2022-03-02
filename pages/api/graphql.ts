@@ -22,7 +22,7 @@ export default Cors({
     "EBBS",
   ],
   allowMethods: ["POST", "OPTIONS"],
-  origin,
+  // origin,
   // @ts-ignore
 })(async (req: MicroRequest, res: NextApiResponse) => {
   if (req.method === "OPTIONS") {
