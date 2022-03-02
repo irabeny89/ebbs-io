@@ -2,7 +2,6 @@ import { CookieSerializeOptions } from "cookie";
 
 const isProductionEnv = process.env.NODE_ENV === "production",
   localHost = "http://localhost:4000",
-  productionHost = "https://ebbs-io.vercel.app",
   ebbsLocalOrigin = "http://localhost:3000",
   config = {
     appData: {
@@ -82,14 +81,14 @@ const isProductionEnv = process.env.NODE_ENV === "production",
             : ebbsLocalOrigin,
         },
       ],
-      host: isProductionEnv ? productionHost : localHost,
+      host: isProductionEnv ? process.env.EBBS_CLIENT_HOST : localHost,
       graphqlUri: "/api/graphql",
-      ebbsEmail: process.env.EBBS_EMAIL!,
-      ebbsUsername: process.env.EBBS_USERNAME!,
-      ebbsPassword: process.env.EBBS_PASSWORD!,
-      ebbsEmailHost: process.env.EBBS_EMAIL_HOST!,
+      ebbsEmail: process.env.EBBS_EMAIL,
+      ebbsUsername: process.env.EBBS_USERNAME,
+      ebbsPassword: process.env.EBBS_PASSWORD,
+      ebbsEmailHost: process.env.EBBS_EMAIL_HOST,
       ebbsEmailPort: +process.env.EBBS_EMAIL_PORT!,
-      web3storageKey: process.env.NEXT_PUBLIC_WEB3_STORAGE_KEY!,
+      web3storageKey: process.env.NEXT_PUBLIC_WEB3_STORAGE_KEY,
     },
   };
 
