@@ -89,4 +89,19 @@ describe("getCursorConnection", () => {
     expect(edges).toHaveLength(2);
     expect(edges[1].node.name).toBe("A4");
   });
+
+  it("should have edges with cursor & node properties.", () => {
+    const { edges } = getCursorConnection({
+      list: testList,
+      first: 5,
+    });
+
+    expect(
+      edges.every((edge) => Object.keys(edge).includes("cursor" && "node"))
+    ).toBeTruthy();
+    expect(edges[0]).toEqual({
+      cursor: testList[0].createdAt,
+      node: testList[0],
+    });
+  });
 });
