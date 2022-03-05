@@ -3,6 +3,7 @@ import {
   REFRESH_TOKEN_QUERY,
   SET_ORDER_DELIVERY_DATE,
   UPDATE_ORDER_ITEM_STATUS,
+  USER_LOGIN,
 } from "@/graphql/documentNodes";
 import { ApolloServer } from "apollo-server-micro";
 import { verify } from "jsonwebtoken";
@@ -23,6 +24,8 @@ jest.mock("@/utils/index", () => ({
   authUser: jest.fn(() => ({ accessToken: "accessToken" })),
   setCookie: jest.fn(),
   getAuthPayload: jest.fn(),
+  handleError: jest.fn(),
+  comparePassword: jest.fn().mockReturnValue("accessToken")
 }));
 
 describe("Apollo Server", () => {
@@ -51,8 +54,27 @@ describe("Apollo Server", () => {
           })),
         })),
       },
+      UserModel: {
+        findOne: jest.fn(() => ({
+          select: jest.fn(() => ({
+            lean: jest.fn(() => ({
+              exec: jest.fn(),
+            })),
+          })),
+        })),
+      },
+      ServiceModel: {
+        findOne: jest.fn(() => ({
+          select: jest.fn(() => ({
+            lean: jest.fn(() => ({
+              exec: jest.fn(),
+            })),
+          })),
+        })),
+      },
     }),
   });
+  // QUERIES
   // hello query
   it("returns the string 'world' from hello query", async () => {
     const { data, errors } = await testServer.executeOperation({
@@ -72,15 +94,28 @@ describe("Apollo Server", () => {
     expect(data?.refreshToken).toBe("accessToken");
   });
   // logout query
-  it("logs out successfully without error", async () => {
+  it("logs out successfully without error with logout query", async () => {
     const { errors } = await testServer.executeOperation({
       query: LOGOUT,
     });
 
     expect(errors).toBeUndefined();
   });
-  // user item status update mutation
-  it("updates user order status, non-nullable & return status", async () => {
+  // login query
+  it("logs in successfully without error with login query", async () => {
+    const { errors } = await testServer.executeOperation({
+      query: USER_LOGIN,
+      variables: {
+        email: "irabeny89@ebbs.com",
+        password: "ebbs2022"
+      }
+    });
+    
+    expect(errors).toBeUndefined();
+  });
+  // MUTATIONS
+  // updateOrderItemStatus mutation
+  it("updates user order status; non-nullable & return status from updateOrderItemStatus mutation", async () => {
     const { errors, data } = await testServer.executeOperation({
       query: UPDATE_ORDER_ITEM_STATUS,
       variables: {
