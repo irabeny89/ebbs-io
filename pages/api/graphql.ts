@@ -13,21 +13,20 @@ const server = apolloServer.start();
 export const config = { api: { bodyParser: false } };
 
 export default Cors({
-  allowCredentials: true,
   allowHeaders: [
     "Origin",
     "X-Requested-With",
     "Content-Type",
-    "Accept",
-    "EBBS",
+    "apollographql-client-name",
+    "apollographql-client-version",
+    "authorization",
   ],
   allowMethods: ["POST", "OPTIONS"],
-  // origin,
+  origin,
   // @ts-ignore
 })(async (req: MicroRequest, res: NextApiResponse) => {
   if (req.method === "OPTIONS") {
-    res.end();
-    return false;
+    return res.send("ok");
   }
   await server;
   return await apolloServer.createHandler({

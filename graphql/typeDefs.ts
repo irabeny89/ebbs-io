@@ -102,7 +102,7 @@ input NewProductInput {
 
 input RegisterInput {
   username: String!
-  email: String!
+  passCode: String!
   password: String!
   title: String
   logoCID: String

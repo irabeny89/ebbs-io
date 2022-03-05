@@ -1,4 +1,10 @@
-import { randomBytes, scrypt, BinaryLike, timingSafeEqual, createHash } from "crypto";
+import {
+  randomBytes,
+  scrypt,
+  BinaryLike,
+  timingSafeEqual,
+  createHash,
+} from "crypto";
 import { AuthenticationError, ForbiddenError } from "apollo-server-micro";
 import { promisify } from "util";
 import { serialize, CookieSerializeOptions } from "cookie";
@@ -19,7 +25,6 @@ const {
   environmentVariable: {
     jwtAccessSecret,
     jwtRefreshSecret,
-    nodeEnvironment,
     host,
   },
 } = config;
@@ -31,16 +36,17 @@ export const LOGIN_ERROR_MESSAGE = "Enter correct email and password";
 export const setCookie = (
   res: NextApiResponse,
   name: string,
-  value: unknown,
+  value: string | object,
   options: CookieSerializeOptions = {}
 ) => {
-  const stringValue =
-    typeof value === "object" ? "j:" + JSON.stringify(value) : String(value);
-  if ("maxAge" in options) {
-    options.expires = new Date(Date.now() + options.maxAge!);
-    options.maxAge! /= 1000;
-  }
-  res.setHeader("Set-Cookie", serialize(name, String(stringValue), options));
+  res.setHeader(
+    "Set-Cookie",
+    serialize(
+      name,
+      typeof value === "object" ? JSON.stringify(value) : value,
+      options
+    )
+  );
 };
 
 export const getHashedPassword = async (password: string) => {
@@ -140,11 +146,10 @@ export const authUser = (payload: UserPayloadType, res: NextApiResponse) => {
   const tokenPair = createTokenPair(payload);
   // 30 days refresh token in the cookie
   setCookie(res, "token", tokenPair.refreshToken, {
-    maxAge: 2592000000,
+    maxAge: 2592e3,
     httpOnly: true,
     sameSite: "lax",
-    secure: nodeEnvironment === "production" ?? false,
-    path: "/api/graphql",
+    secure: true,
   });
 
   return tokenPair;
@@ -240,22 +245,25 @@ export const getCursorConnection = <
 
 export const devErrorLogger = (error: any) =>
   isDevEnv &&
-  (console.log("===================================="),
+  (console.log("================dev================"),
   console.log(error),
   console.log("===================================="));
 
-  export const getHash = (data: string) => createHash("sha256").update(data).digest("hex")
+export const getHash = (data: string) =>
+  createHash("sha256").update(data).digest("hex");
 
-  export const verifyPassCodeData = ({
-    email, hashedPassCode
-  }: PassCodeDataType, passCode: string) => {
-    // throws error when passCodeData or hashedPassCode is undefined.
-    // throw error if passcode is invalid
-    handleError(
-      !timingSafeEqual(Buffer.from(passCode), Buffer.from(hashedPassCode)),
-      ForbiddenError,
-      "Failed! Get a new passcode and try again."
-    );
-
-    return email
-  }
+  // verify and return email if no error
+  export const verifyPassCodeData = (
+    { email, hashedPassCode }: PassCodeDataType,
+    passCode: string
+    ) => (
+  handleError(
+    !timingSafeEqual(
+      Buffer.from(getHash(passCode)),
+      Buffer.from(hashedPassCode)
+    ),
+    ForbiddenError,
+    "Failed! Get a new passcode and try again."
+  ),
+  email
+);

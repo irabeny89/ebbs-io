@@ -70,7 +70,7 @@ const resolvers = {
         maxAge: 0,
         httpOnly: true,
         sameSite: true,
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
       }),
       "Logged out successfully."
     ),
@@ -115,17 +115,12 @@ const resolvers = {
     refreshToken: async (
       _: any,
       __: any,
-      {
-        req: {
-          cookies: { token },
-        },
-        res,
-      }: GraphContextType
+      { req: { cookies }, res }: GraphContextType
     ) => {
       try {
         // verify refresh token
         const { aud, sub, username, serviceId } = verify(
-          token,
+          cookies.token,
           jwtRefreshSecret
         ) as JwtPayload & UserPayloadType;
         // re-auth user & return token
@@ -164,10 +159,11 @@ const resolvers = {
             maxAge: passCodeDuration * 60,
             httpOnly: true,
             sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
+            path: "/member"
           }
         );
-        // send email and log link for test account
+        // send email and console.log test account link
         console.log(
           `test email link: ${
             (
@@ -334,57 +330,53 @@ const resolvers = {
       }: RegisterVariableType,
       { UserModel, ServiceModel, res, req: { cookies } }: GraphContextType
     ) => {
+      const USER_INPUT_ERROR =
+        "username or password invalid! Verify, get another passcode and try again.";
+      const FORBIDDEN_ERROR =
+        "Something happened. Get a new passcode and try again.";
       try {
-        // verify & get email from cookies
-        const { passCodeData } = cookies as unknown as Record<
-            "passCodeData",
-            PassCodeDataType
-          >,
-          email = verifyPassCodeData(passCodeData, passCode);
-        // if user exist throw error or password length < 8
+        // throw error if passcode is undefined
+        handleError(!cookies.passCodeData, ForbiddenError, FORBIDDEN_ERROR);
+        // throws forbidden error if passCode data is invalid
+        const email = verifyPassCodeData(
+          JSON.parse(cookies.passCodeData),
+          passCode
+        );
+        // existing users throw error
         handleError(
           await UserModel.findOne({ email }).select("email").lean().exec(),
-          AuthenticationError,
-          "User already exist"
+          UserInputError,
+          USER_INPUT_ERROR
         ),
-          handleError(
-            password.length < 8,
-            UserInputError,
-            "Password should be 8 or more characters"
-          );
-        // else create user
+          // password length < 8 throws error
+          handleError(password.length < 8, UserInputError, USER_INPUT_ERROR);
+        // create user
         const { id, username: _username } = (
           await UserModel.create([
             { email, username, ...(await getHashedPassword(password)) },
           ])
         )[0];
-        // clear passCodeData from cookies since it is no more needed
         // create service for user
         // return access token
-        return (
-          setCookie(res, COOKIE_PASSCODE, "", COOKIE_CLEAR_OPTIONS),
-          authUser(
-            {
-              audience: "USER",
-              id,
-              username: _username,
-              serviceId: (
-                await ServiceModel.create([{ ...serviceData, owner: id }])
-              )[0].id,
-            },
-            res
-          ).accessToken
-        );
+        return authUser(
+          {
+            audience: "USER",
+            id,
+            username: _username,
+            serviceId: (
+              await ServiceModel.create([{ ...serviceData, owner: id }])
+            )[0].id,
+          },
+          res
+        ).accessToken;
       } catch (error: any) {
-        // NOTE: log error to debug
-        ["ForbiddenError"].includes(error.name) &&
-          handleError(
-            error,
-            ForbiddenError,
-            "Something happened. Get a new passcode and try again."
-          );
+        // log error to console
         devErrorLogger(error);
-        handleError(error, AuthenticationError, generalErrorMessage);
+        error.name === "ForbiddenError" &&
+          handleError(error, ForbiddenError, FORBIDDEN_ERROR);
+        error.name === "UserInputError" &&
+          handleError(error, UserInputError, USER_INPUT_ERROR);
+        handleError(error, ApolloError, generalErrorMessage);
       }
     },
     changePassword: async (
@@ -489,7 +481,11 @@ const resolvers = {
       } catch (error: any) {
         // NOTE: log to debug
         devErrorLogger(error);
-        handleError(error.code === 11000, UserInputError, "Product name already exist.")
+        handleError(
+          error.code === 11000,
+          UserInputError,
+          "Product name already exist."
+        );
         handleError(error, AuthenticationError, generalErrorMessage);
       }
     },
@@ -691,10 +687,7 @@ const resolvers = {
     ) => {
       try {
         return (
-          await UserModel.findById(parent._id)
-            .select("username")
-            .lean()
-            .exec()
+          await UserModel.findById(parent._id).select("username").lean().exec()
         )?.username;
       } catch (error) {
         // NOTE: log to debug
@@ -799,9 +792,7 @@ const resolvers = {
           list:
             (await Promise.all(
               (
-                await ProductModel.find({ provider: parent._id })
-                  .lean()
-                  .exec()
+                await ProductModel.find({ provider: parent._id }).lean().exec()
               ).map(async (item) => ({
                 ...item,
                 saleCount:
@@ -904,10 +895,7 @@ const resolvers = {
     ) => {
       try {
         return (
-          await ProductModel.find({ provider: _id })
-            .select("_id")
-            .lean()
-            .exec()
+          await ProductModel.find({ provider: _id }).select("_id").lean().exec()
         ).length;
       } catch (error) {
         // NOTE: log error to debug
@@ -955,6 +943,6 @@ const resolvers = {
   ServiceOrder: {
     orderStats: ({ items }: OrderType) => getOrderItemStats(items),
   },
-}
+};
 
-export default resolvers
+export default resolvers;

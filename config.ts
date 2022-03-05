@@ -52,7 +52,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
         body: "Hello, enter the access code to change your password on EBBS website - ",
       },
       generalErrorMessage:
-        "Something went wrong. Login or check your inputs and try again",
+        "Something went wrong. Check your internet or login or check your inputs and try again",
       constants: {
         AUTH_PAYLOAD: "authPayload",
         CART_ITEMS_KEY: "ebbsCartItems",
