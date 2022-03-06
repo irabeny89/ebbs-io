@@ -161,7 +161,6 @@ const resolvers = {
             httpOnly: true,
             sameSite: "lax",
             secure: true,
-            path: "/member",
           }
         );
         // send email and console.log test account link
