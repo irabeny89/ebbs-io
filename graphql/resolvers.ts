@@ -18,7 +18,6 @@ import type {
   UserType,
   OrderStatsType,
   StatusType,
-  PassCodeDataType,
 } from "types";
 import {
   authUser,
@@ -86,26 +85,28 @@ const resolvers = {
           .lean()
           .exec();
         // throw error if user does not exist
-        handleError(!user, AuthenticationError, "Authentication failed!");
+        handleError(!user, AuthenticationError, generalErrorMessage);
         // if user exist validate password
-        // then authenticate user & return token
-        return (
-          (await comparePassword(user?.password!, password, user?.salt!)) &&
-          authUser(
-            {
-              audience: "USER",
-              id: user?._id?.toString()!,
-              username: user?.username!,
-              serviceId: (
-                await ServiceModel.findOne({ owner: user?._id })
-                  .select("_id")
-                  .lean()
-                  .exec()
-              )?._id?.toString(),
-            },
-            res
-          ).accessToken
+        handleError(
+          !(await comparePassword(user?.password!, password, user?.salt!)),
+          AuthenticationError,
+          generalErrorMessage
         );
+        // then authenticate user & return token
+        return authUser(
+          {
+            audience: "USER",
+            id: user?._id?.toString()!,
+            username: user?.username!,
+            serviceId: (
+              await ServiceModel.findOne({ owner: user?._id })
+                .select("_id")
+                .lean()
+                .exec()
+            )?._id?.toString(),
+          },
+          res
+        ).accessToken;
       } catch (error) {
         // NOTE: log error to debug
         devErrorLogger(error);
@@ -160,7 +161,7 @@ const resolvers = {
             httpOnly: true,
             sameSite: "lax",
             secure: true,
-            path: "/member"
+            path: "/member",
           }
         );
         // send email and console.log test account link

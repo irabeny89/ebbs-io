@@ -22,16 +22,18 @@ import config from "../config";
 export const isDevEnv = process.env.NODE_ENV === "development";
 
 const {
-  environmentVariable: {
-    jwtAccessSecret,
-    jwtRefreshSecret,
-    host,
-  },
+  environmentVariable: { jwtAccessSecret, jwtRefreshSecret, host },
 } = config;
 
 export const AUTHORIZATION_ERROR_MESSAGE = "Authorization failed";
 
 export const LOGIN_ERROR_MESSAGE = "Enter correct email and password";
+
+export const devErrorLogger = (error: any) =>
+  isDevEnv &&
+  (console.log("================dev================"),
+  console.log(error),
+  console.log("===================================="));
 
 export const setCookie = (
   res: NextApiResponse,
@@ -72,25 +74,27 @@ export const getAuthPayload = (authorization: string) =>
   verify(authorization!.replace("Bearer ", ""), jwtAccessSecret) as JwtPayload &
     Omit<UserPayloadType, "id">;
 
-const hashPassword = async (password: string, salt: string) =>
-  (await asyncScrypt(password, salt, 64)).toString("hex");
+export const hashPassword = async (password: string, salt: string) => {
+  try {
+    return (await asyncScrypt(password, salt, 64)).toString("hex");
+  } catch (error) {
+    devErrorLogger(error);
+  }
+};
 
 export const comparePassword = async (
   hashedPassword: string,
   password: string,
   salt: string
 ) => {
-  const isValid = timingSafeEqual(
-    Buffer.from(hashedPassword),
-    Buffer.from(await hashPassword(password, salt))
-  );
-  handleError(
-    !isValid,
-    AuthenticationError,
-    AUTHORIZATION_ERROR_MESSAGE + " - Invalid email or password"
-  );
-
-  return isValid;
+  try {
+    return timingSafeEqual(
+      Buffer.from(hashedPassword),
+      Buffer.from((await hashPassword(password, salt))!)
+    );
+  } catch (error) {
+    devErrorLogger(error);
+  }
 };
 // check admin user
 export const isAdminUser = (accessToken: string) => {
@@ -119,7 +123,7 @@ const generateToken = (
 };
 
 // generate access & refresh token
-const createTokenPair = ({
+export const createTokenPair = ({
   audience,
   username,
   serviceId,
@@ -243,20 +247,14 @@ export const getCursorConnection = <
   };
 };
 
-export const devErrorLogger = (error: any) =>
-  isDevEnv &&
-  (console.log("================dev================"),
-  console.log(error),
-  console.log("===================================="));
-
 export const getHash = (data: string) =>
   createHash("sha256").update(data).digest("hex");
 
-  // verify and return email if no error
-  export const verifyPassCodeData = (
-    { email, hashedPassCode }: PassCodeDataType,
-    passCode: string
-    ) => (
+// verify and return email if no error
+export const verifyPassCodeData = (
+  { email, hashedPassCode }: PassCodeDataType,
+  passCode: string
+) => (
   handleError(
     !timingSafeEqual(
       Buffer.from(getHash(passCode)),

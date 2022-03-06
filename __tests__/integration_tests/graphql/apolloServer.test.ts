@@ -6,8 +6,6 @@ import {
   USER_LOGIN,
 } from "@/graphql/documentNodes";
 import { ApolloServer } from "apollo-server-micro";
-import { verify } from "jsonwebtoken";
-import { authUser, setCookie, getAuthPayload } from "@/utils/index";
 import resolvers from "@/graphql/resolvers";
 import typeDefs from "@/graphql/typeDefs";
 
@@ -103,7 +101,7 @@ describe("Apollo Server", () => {
   });
   // login query
   it("logs in successfully without error with login query", async () => {
-    const { errors } = await testServer.executeOperation({
+    const { errors, data } = await testServer.executeOperation({
       query: USER_LOGIN,
       variables: {
         email: "irabeny89@ebbs.com",
@@ -112,6 +110,7 @@ describe("Apollo Server", () => {
     });
     
     expect(errors).toBeUndefined();
+    expect(data?.login)
   });
   // MUTATIONS
   // updateOrderItemStatus mutation
