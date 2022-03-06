@@ -4,11 +4,12 @@ import type { ServiceType } from "types";
 
 const schema = new Schema<ServiceType>(
   {
-    title: String,
-    logoCID: String,
+    title: { type: String, trim: true },
+    logoCID: { type: String, trim: true },
     description: {
       type: String,
       maxlength: 255,
+      trim: true,
     },
     state: String,
     maxProduct: {

@@ -261,7 +261,7 @@ export const verifyPassCodeData = (
       Buffer.from(hashedPassCode)
     ),
     ForbiddenError,
-    "Failed! Get a new passcode and try again."
+    "Verification failed! Get a new passcode and try again."
   ),
   email
 );

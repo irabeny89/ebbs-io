@@ -65,12 +65,7 @@ const resolvers = {
   Query: {
     hello: () => "world!",
     logout: (_: any, __: any, { res }: GraphContextType) => (
-      setCookie(res, "token", "", {
-        maxAge: 0,
-        httpOnly: true,
-        sameSite: true,
-        secure: process.env.NODE_ENV === "production",
-      }),
+      setCookie(res, "token", "", COOKIE_CLEAR_OPTIONS),
       "Logged out successfully."
     ),
     login: async (
@@ -85,12 +80,12 @@ const resolvers = {
           .lean()
           .exec();
         // throw error if user does not exist
-        handleError(!user, AuthenticationError, generalErrorMessage);
+        handleError(!user, AuthenticationError, "User not found on database");
         // if user exist validate password
         handleError(
           !(await comparePassword(user?.password!, password, user?.salt!)),
           AuthenticationError,
-          generalErrorMessage
+          "Passwords do not match."
         );
         // then authenticate user & return token
         return authUser(
@@ -147,7 +142,7 @@ const resolvers = {
     ) => {
       try {
         // generate pass code
-        const passCode = randomBytes(8).toString("hex");
+        const passCode = randomBytes(4).toString("hex");
         // store hash in user cookie
         setCookie(
           res,
@@ -385,26 +380,25 @@ const resolvers = {
       { UserModel, req: { cookies }, res }: GraphContextType
     ): Promise<string | undefined> => {
       try {
-        // throws error if passCodeData is undefined.
-        // if no error then update the user password
-        // clear passcode data from cookies
-        // return successful message
-        return (
-          await UserModel.findOneAndUpdate(
-            // @ts-ignore
-            { email: verifyPassCodeData(cookies.passCodeData, passCode) },
-            {
-              $set: { password: newPassword },
-            }
-          )
-            .select("_id")
-            .lean()
-            .exec(),
-          setCookie(res, COOKIE_PASSCODE, COOKIE_CLEAR_OPTIONS),
-          "Password changed successfully."
-        );
+        const user = await UserModel.findOneAndUpdate(
+          {
+            email: verifyPassCodeData(
+              JSON.parse(cookies.passCodeData),
+              passCode
+            ),
+          },
+          {
+            $set: { ...(await getHashedPassword(newPassword)) },
+          }
+        )
+          .select("username")
+          .lean()
+          .exec();
+
+        setCookie(res, COOKIE_PASSCODE, COOKIE_CLEAR_OPTIONS);
+
+        return `${user?.username} password changed successfully. Login with new password.`;
       } catch (error) {
-        // NOTE: log error to debug
         devErrorLogger(error);
         handleError(
           error,
