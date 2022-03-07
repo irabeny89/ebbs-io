@@ -154,7 +154,7 @@ const resolvers = {
           {
             maxAge: passCodeDuration * 60,
             httpOnly: true,
-            sameSite: "lax",
+            sameSite: "none",
             secure: true,
           }
         );

@@ -152,7 +152,7 @@ export const authUser = (payload: UserPayloadType, res: NextApiResponse) => {
   setCookie(res, "token", tokenPair.refreshToken, {
     maxAge: 2592e3,
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     secure: true,
   });
 
