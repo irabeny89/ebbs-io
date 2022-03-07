@@ -166,15 +166,15 @@ const resolvers = {
                 from: `${ebbsTitle}`,
                 to: email,
                 subject: `${abbr} Pass Code`,
-                html: `<h1>${ebbsTitle}</h1>
-        <h2>Pass Code: ${passCode}</h2>
+                html: `<h2>${ebbsTitle}</h2>
+        <h3>Pass Code: ${passCode}</h3>
         <p>It expires in ${passCodeDuration} minutes</p>`,
               })
             ).testAccountMessageUrl
           }`
         );
 
-        return "Passcode sent to your email successfully";
+        return "Check your email.";
       } catch (error) {
         // NOTE: log error to debug
         devErrorLogger(error);
@@ -225,7 +225,7 @@ const resolvers = {
           list:
             (await Promise.all(
               (
-                await ProductModel.find().lean().exec()
+                await ProductModel.find().populate("provider").lean().exec()
               ).map(async (item) => ({
                 ...item,
                 saleCount:
@@ -383,7 +383,7 @@ const resolvers = {
         const user = await UserModel.findOneAndUpdate(
           {
             email: verifyPassCodeData(
-              JSON.parse(cookies.passCodeData),
+              JSON.parse(cookies?.passCodeData),
               passCode
             ),
           },
@@ -786,7 +786,7 @@ const resolvers = {
           list:
             (await Promise.all(
               (
-                await ProductModel.find({ provider: parent._id }).lean().exec()
+                await ProductModel.find({ provider: parent._id }).populate("provider").lean().exec()
               ).map(async (item) => ({
                 ...item,
                 saleCount:

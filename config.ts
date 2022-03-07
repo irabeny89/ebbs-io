@@ -1,8 +1,6 @@
 import { CookieSerializeOptions } from "cookie";
 
 const isProductionEnv = process.env.NODE_ENV === "production",
-  localHost = "http://localhost:4000",
-  ebbsLocalOrigin = "http://localhost:3000",
   config = {
     appData: {
       author: "Ernest Irabor",
@@ -44,7 +42,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
         },
       ],
       // time in minutes
-      passCodeDuration: 15,
+      passCodeDuration: 10,
       maxProductAllowed: 12,
       passwordRecoveryOption: {
         subject: "EBBS - Password Recovery",
@@ -77,11 +75,11 @@ const isProductionEnv = process.env.NODE_ENV === "production",
         {
           name: "ebbs",
           origin: isProductionEnv
-            ? process.env.EBBS_CLIENT_ORIGIN!
-            : ebbsLocalOrigin,
+            ? "https://ebbs.vercel.app"
+            : "http://localhost:3000",
         },
       ],
-      host: isProductionEnv ? process.env.EBBS_CLIENT_HOST : localHost,
+      host: isProductionEnv ? "https://ebbs-io.vercel.app" : "http://localhost:4000",
       graphqlUri: "/api/graphql",
       ebbsEmail: process.env.EBBS_EMAIL,
       ebbsUsername: process.env.EBBS_USERNAME,
