@@ -13,7 +13,7 @@ type PassCodeDataType = Record<"email" | "hashedPassCode", string>;
 type UserPayloadType = {
   serviceId?: string;
   username: string;
-  audience: "ADMIN" | "USER";
+  audience: "admin" | "user";
   id: string;
 };
 

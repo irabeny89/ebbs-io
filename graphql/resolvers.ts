@@ -90,7 +90,7 @@ const resolvers = {
         // then authenticate user & return token
         return authUser(
           {
-            audience: "USER",
+            audience: "user",
             id: user?._id?.toString()!,
             username: user?.username!,
             serviceId: (
@@ -123,7 +123,7 @@ const resolvers = {
         return authUser(
           {
             id: sub!,
-            audience: aud as "ADMIN" | "USER",
+            audience: aud as UserPayloadType["audience"],
             username,
             serviceId,
           },
@@ -355,7 +355,7 @@ const resolvers = {
         // return access token
         return authUser(
           {
-            audience: "USER",
+            audience: "user",
             id,
             username: _username,
             serviceId: (
