@@ -159,7 +159,7 @@ const resolvers = {
           }
         );
         // send email and console.log test account link
-        console.log(
+        process.env.OFFLINE! ? console.log(passCode) : console.log(
           `test email link: ${
             (
               await sendEmail({
@@ -351,6 +351,8 @@ const resolvers = {
             { email, username, ...(await getHashedPassword(password)) },
           ])
         )[0];
+        // clear cookie
+        setCookie(res, COOKIE_PASSCODE, "", COOKIE_CLEAR_OPTIONS);
         // create service for user
         // return access token
         return authUser(
@@ -394,8 +396,8 @@ const resolvers = {
           .select("username")
           .lean()
           .exec();
-
-        setCookie(res, COOKIE_PASSCODE, COOKIE_CLEAR_OPTIONS);
+        // clear cookie
+        setCookie(res, COOKIE_PASSCODE, "", COOKIE_CLEAR_OPTIONS);
 
         return `${user?.username} password changed successfully. Login with new password.`;
       } catch (error) {

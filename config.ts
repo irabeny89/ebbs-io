@@ -68,18 +68,22 @@ const isProductionEnv = process.env.NODE_ENV === "production",
       jwtAccessSecret: process.env.JWT_ACCESS_SECRET!,
       jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
       nodeEnvironment: process.env.NODE_ENV,
-      dbUrl: isProductionEnv
-        ? process.env.DB_URL_ATLAS!
-        : process.env.DB_URL_COMPASS!,
+      dbUrl:
+        isProductionEnv && !process.env.OFFLINE!
+          ? process.env.DB_URL_ATLAS!
+          : process.env.DB_URL_COMPASS!,
       origins: [
         {
           name: "ebbs",
-          origin: isProductionEnv
-            ? "https://ebbs.vercel.app"
-            : "http://localhost:3000",
+          origin:
+            isProductionEnv && !process.env.OFFLINE!
+              ? "https://ebbs.vercel.app"
+              : "http://localhost:3000",
         },
       ],
-      host: isProductionEnv ? "https://ebbs-io.vercel.app" : "http://localhost:4000",
+      host: isProductionEnv  && !process.env.OFFLINE!
+        ? "https://ebbs-io.vercel.app"
+        : "http://localhost:4000",
       graphqlUri: "/api/graphql",
       ebbsEmail: process.env.EBBS_EMAIL,
       ebbsUsername: process.env.EBBS_USERNAME,
