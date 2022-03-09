@@ -159,20 +159,22 @@ const resolvers = {
           }
         );
         // send email and console.log test account link
-        process.env.OFFLINE! ? console.log(passCode) : console.log(
-          `test email link: ${
-            (
-              await sendEmail({
-                from: `${ebbsTitle}`,
-                to: email,
-                subject: `${abbr} Pass Code`,
-                html: `<h2>${ebbsTitle}</h2>
+        process.env.OFFLINE!
+          ? console.log(passCode)
+          : console.log(
+              `test email link: ${
+                (
+                  await sendEmail({
+                    from: `${ebbsTitle}`,
+                    to: email,
+                    subject: `${abbr} Pass Code`,
+                    html: `<h2>${ebbsTitle}</h2>
         <h3>Pass Code: ${passCode}</h3>
         <p>It expires in ${passCodeDuration} minutes</p>`,
-              })
-            ).testAccountMessageUrl
-          }`
-        );
+                  })
+                ).testAccountMessageUrl
+              }`
+            );
 
         return "Check your email.";
       } catch (error) {
@@ -411,7 +413,9 @@ const resolvers = {
     },
     myServiceUpdate: async (
       _: any,
-      { args: serviceUpdate }: Record<"args", ServiceUpdateVariableType>,
+      {
+        args: serviceUpdate,
+      }: Record<"args", Partial<ServiceUpdateVariableType["serviceUpdate"]>>,
       {
         ServiceModel,
         req: {
@@ -420,6 +424,8 @@ const resolvers = {
       }: GraphContextType
     ): Promise<string | undefined> => {
       try {
+        // this prevents overwriting; you can only update existing
+        serviceUpdate.logoCID || delete serviceUpdate.logoCID;
         await ServiceModel.findByIdAndUpdate(
           getAuthPayload(authorization!).serviceId,
           {
@@ -788,7 +794,10 @@ const resolvers = {
           list:
             (await Promise.all(
               (
-                await ProductModel.find({ provider: parent._id }).populate("provider").lean().exec()
+                await ProductModel.find({ provider: parent._id })
+                  .populate("provider")
+                  .lean()
+                  .exec()
               ).map(async (item) => ({
                 ...item,
                 saleCount:
