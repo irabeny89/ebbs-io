@@ -804,7 +804,6 @@ const resolvers = {
           ...args,
         });
       } catch (error) {
-        // NOTE: log error to debug
         devErrorLogger(error);
         handleError(error, Error, generalErrorMessage);
       }
