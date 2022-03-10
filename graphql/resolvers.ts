@@ -802,8 +802,10 @@ const resolvers = {
                 ...item,
                 saleCount:
                   (
-                    await OrderModel.findById(item._id)
-                      .$where("status == SHIPPED")
+                    await OrderModel.find({
+                      "items.productId": item._id,
+                      "items.status": "DELIVERED"
+                    })
                       .select("_id")
                       .lean()
                       .exec()
