@@ -3,16 +3,14 @@ import {
   scrypt,
   BinaryLike,
   timingSafeEqual,
-  createHash,
 } from "crypto";
-import { AuthenticationError, ForbiddenError } from "apollo-server-micro";
+import { AuthenticationError } from "apollo-server-micro";
 import { promisify } from "util";
 import { serialize, CookieSerializeOptions } from "cookie";
 import { NextApiResponse } from "next";
 import {
   CursorConnectionArgsType,
   CursorConnectionType,
-  PassCodeDataType,
   TokenPairType,
   UserPayloadType,
 } from "types";
@@ -30,7 +28,6 @@ export const AUTHORIZATION_ERROR_MESSAGE = "Authorization failed";
 export const LOGIN_ERROR_MESSAGE = "Enter correct email and password";
 
 export const devErrorLogger = (error: any) =>
-  isDevEnv &&
   (console.log("================dev================"),
   console.log(error),
   console.log("===================================="));

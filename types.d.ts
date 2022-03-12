@@ -14,8 +14,6 @@ type JwtPayload = {
   jti?: string | undefined;
 }
 
-type PassCodeDataType = Record<"email" | "hashedPassCode", string>;
-
 type UserPayloadType = {
   serviceId?: string;
   username: string;
