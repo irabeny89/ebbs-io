@@ -31,7 +31,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
         "FOOD_DRUGS",
         "SOFTWARES",
         "PETS",
-        "ARTS"
+        "ARTS",
       ],
       orderStatuses: ["PENDING", "SHIPPED", "DELIVERED", "CANCELED"],
       subscriptionInfos: [
@@ -48,7 +48,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
       passCodeDuration: 10,
       maxProductAllowed: 12,
       generalErrorMessage:
-        "Something went wrong. Check your internet or login or check your inputs and try again",
+        "Something went wrong. Check your internet, refresh, or login or check your inputs and try again",
       constants: {
         AUTH_PAYLOAD: "authPayload",
         CART_ITEMS_KEY: "ebbsCartItems",
@@ -79,9 +79,10 @@ const isProductionEnv = process.env.NODE_ENV === "production",
               : "http://localhost:3000",
         },
       ],
-      host: isProductionEnv  && !process.env.OFFLINE!
-        ? "https://ebbs-io.vercel.app"
-        : "http://localhost:4000",
+      host:
+        isProductionEnv && !process.env.OFFLINE!
+          ? "https://ebbs-io.vercel.app"
+          : "http://localhost:4000",
       graphqlUri: "/api/graphql",
       ebbsEmail: process.env.EBBS_EMAIL,
       ebbsUsername: process.env.EBBS_USERNAME,

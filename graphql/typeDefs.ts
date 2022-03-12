@@ -151,6 +151,9 @@ enum CategoryOption {
   VEHICLES
   ELECTRONICS
   FOOD_DRUGS
+  SOFTWARES
+  PETS
+  ARTS
 }
 
 enum StatusOptions {
