@@ -246,22 +246,3 @@ export const getCursorConnection = <
     pageInfo: { startCursor, endCursor, hasPreviousPage, hasNextPage },
   };
 };
-
-export const getHash = (data: string) =>
-  createHash("sha256").update(data).digest("hex");
-
-// verify and return email if no error
-export const verifyPassCodeData = (
-  { email, hashedPassCode }: PassCodeDataType,
-  passCode: string
-) => (
-  handleError(
-    !timingSafeEqual(
-      Buffer.from(getHash(passCode)),
-      Buffer.from(hashedPassCode)
-    ),
-    ForbiddenError,
-    "Verification failed! Get a new passcode and try again."
-  ),
-  email
-);

@@ -1,12 +1,18 @@
-import mongoose, { Document, Connection, Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { NextApiRequest, NextApiResponse } from "next";
-import Dataloader from "dataloader";
-import { JwtPayload } from "jsonwebtoken";
-import { MicroRequest } from "apollo-server-micro/dist/types";
-import path from "path";
-import { MutableRefObject, ReactNode } from "react";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+
+type JwtPayload = {
+  [key: string]: any;
+  iss?: string | undefined;
+  sub?: string | undefined;
+  aud?: string | string[] | undefined;
+  exp?: number | undefined;
+  nbf?: number | undefined;
+  iat?: number | undefined;
+  jti?: string | undefined;
+}
 
 type PassCodeDataType = Record<"email" | "hashedPassCode", string>;
 

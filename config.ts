@@ -44,17 +44,12 @@ const isProductionEnv = process.env.NODE_ENV === "production",
       // time in minutes
       passCodeDuration: 10,
       maxProductAllowed: 12,
-      passwordRecoveryOption: {
-        subject: "EBBS - Password Recovery",
-        from: "<no-reply>@gmail.com",
-        body: "Hello, enter the access code to change your password on EBBS website - ",
-      },
       generalErrorMessage:
         "Something went wrong. Check your internet or login or check your inputs and try again",
       constants: {
         AUTH_PAYLOAD: "authPayload",
         CART_ITEMS_KEY: "ebbsCartItems",
-        COOKIE_PASSCODE: "passCodeData",
+        COOKIE_PASSCODE_TOKEN: "passCodeToken",
         COOKIE_CLEAR_OPTIONS: {
           maxAge: -10,
           httpOnly: true,
@@ -69,7 +64,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
       jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
       nodeEnvironment: process.env.NODE_ENV,
       dbUrl:
-        isProductionEnv && !process.env.OFFLINE!
+        isProductionEnv && (!process.env.OFFLINE! || process.env.ATLAS)
           ? process.env.DB_URL_ATLAS!
           : process.env.DB_URL_COMPASS!,
       origins: [

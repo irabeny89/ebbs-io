@@ -1,6 +1,5 @@
 import { randomBytes } from "crypto";
 import config from "../config";
-import { verify, JwtPayload } from "jsonwebtoken";
 import type {
   ChangePasswordVariableType,
   CommentType,
@@ -18,6 +17,7 @@ import type {
   UserType,
   OrderStatsType,
   StatusType,
+  JwtPayload,
 } from "types";
 import {
   authUser,
@@ -25,11 +25,9 @@ import {
   devErrorLogger,
   getAuthPayload,
   getCursorConnection,
-  getHash,
   getHashedPassword,
   handleError,
   setCookie,
-  verifyPassCodeData,
 } from "../utils";
 import {
   AuthenticationError,
@@ -46,7 +44,7 @@ const {
     passCodeDuration,
     abbr,
     maxProductAllowed,
-    constants: { COOKIE_PASSCODE, COOKIE_CLEAR_OPTIONS },
+    constants: { COOKIE_PASSCODE_TOKEN, COOKIE_CLEAR_OPTIONS },
   },
 } = config;
 
@@ -115,10 +113,11 @@ const resolvers = {
     ) => {
       try {
         // verify refresh token
-        const { aud, sub, username, serviceId } = verify(
-          cookies.token,
-          jwtRefreshSecret
-        ) as JwtPayload & UserPayloadType;
+        const { aud, sub, username, serviceId } = (
+          await import("jsonwebtoken")
+        ).verify(cookies.token, jwtRefreshSecret) as JwtPayload &
+          UserPayloadType;
+
         // re-auth user & return token
         return authUser(
           {
@@ -142,15 +141,12 @@ const resolvers = {
     ) => {
       try {
         // generate pass code
-        const passCode = randomBytes(4).toString("hex");
+        const passCode = randomBytes(2).toString("hex");
         // store hash in user cookie
         setCookie(
           res,
-          COOKIE_PASSCODE,
-          {
-            email,
-            hashedPassCode: getHash(passCode),
-          },
+          COOKIE_PASSCODE_TOKEN,
+          (await import("jsonwebtoken")).sign(email, passCode),
           {
             maxAge: passCodeDuration * 60,
             httpOnly: true,
@@ -158,25 +154,26 @@ const resolvers = {
             secure: true,
           }
         );
-        // send email and console.log test account link
-        process.env.OFFLINE!
-          ? console.log(passCode)
-          : console.log(
-              `test email link: ${
-                (
-                  await sendEmail({
-                    from: `${ebbsTitle}`,
-                    to: email,
-                    subject: `${abbr} Pass Code`,
-                    html: `<h2>${ebbsTitle}</h2>
+        // send passcode to email and console.log test account link
+        return (
+          process.env.OFFLINE!
+            ? console.log(passCode)
+            : console.log(
+                `test email link: ${
+                  (
+                    await sendEmail({
+                      from: `${ebbsTitle}`,
+                      to: email,
+                      subject: `${abbr} Pass Code`,
+                      html: `<h2>${ebbsTitle}</h2>
         <h3>Pass Code: ${passCode}</h3>
         <p>It expires in ${passCodeDuration} minutes</p>`,
-                  })
-                ).testAccountMessageUrl
-              }`
-            );
-
-        return "Check your email.";
+                    })
+                  ).testAccountMessageUrl
+                }`
+              ),
+          "Check your email."
+        );
       } catch (error) {
         // NOTE: log error to debug
         devErrorLogger(error);
@@ -328,18 +325,14 @@ const resolvers = {
       { UserModel, ServiceModel, res, req: { cookies } }: GraphContextType
     ) => {
       const USER_INPUT_ERROR =
-        "username or password invalid! Verify, get another passcode and try again.";
-      const FORBIDDEN_ERROR =
-        "Something happened. Get a new passcode and try again.";
+        "Inputs invalid! Verify or get another passcode and try again.";
       try {
-        // throw error if passcode is undefined
-        handleError(!cookies.passCodeData, ForbiddenError, FORBIDDEN_ERROR);
-        // throws forbidden error if passCode data is invalid
-        const email = verifyPassCodeData(
-          JSON.parse(cookies.passCodeData),
+        // decode and retrieve payload
+        const email = (await import("jsonwebtoken")).verify(
+          cookies.passCodeToken,
           passCode
         );
-        // existing users throw error
+        // if user exists throw error
         handleError(
           await UserModel.findOne({ email }).select("email").lean().exec(),
           UserInputError,
@@ -348,15 +341,14 @@ const resolvers = {
           // password length < 8 throws error
           handleError(password.length < 8, UserInputError, USER_INPUT_ERROR);
         // create user
-        const { id, username: _username } = (
-          await UserModel.create([
-            { email, username, ...(await getHashedPassword(password)) },
-          ])
-        )[0];
+        const { id, username: _username } = await UserModel.create({
+          email,
+          username,
+          ...(await getHashedPassword(password)),
+        });
         // clear cookie
-        setCookie(res, COOKIE_PASSCODE, "", COOKIE_CLEAR_OPTIONS);
-        // create service for user
-        // return access token
+        setCookie(res, COOKIE_PASSCODE_TOKEN, "", COOKIE_CLEAR_OPTIONS);
+        // create service for user & return access token
         return authUser(
           {
             audience: "user",
@@ -371,8 +363,6 @@ const resolvers = {
       } catch (error: any) {
         // log error to console
         devErrorLogger(error);
-        error.name === "ForbiddenError" &&
-          handleError(error, ForbiddenError, FORBIDDEN_ERROR);
         error.name === "UserInputError" &&
           handleError(error, UserInputError, USER_INPUT_ERROR);
         handleError(error, ApolloError, generalErrorMessage);
@@ -386,10 +376,9 @@ const resolvers = {
       try {
         const user = await UserModel.findOneAndUpdate(
           {
-            email: verifyPassCodeData(
-              JSON.parse(cookies?.passCodeData),
-              passCode
-            ),
+            email: (
+              await import("jsonwebtoken")
+            ).verify(cookies.passCodeToken, passCode),
           },
           {
             $set: { ...(await getHashedPassword(newPassword)) },
@@ -399,7 +388,7 @@ const resolvers = {
           .lean()
           .exec();
         // clear cookie
-        setCookie(res, COOKIE_PASSCODE, "", COOKIE_CLEAR_OPTIONS);
+        setCookie(res, COOKIE_PASSCODE_TOKEN, "", COOKIE_CLEAR_OPTIONS);
 
         return `${user?.username} password changed successfully. Login with new password.`;
       } catch (error) {
@@ -804,7 +793,7 @@ const resolvers = {
                   (
                     await OrderModel.find({
                       "items.productId": item._id,
-                      "items.status": "DELIVERED"
+                      "items.status": "DELIVERED",
                     })
                       .select("_id")
                       .lean()
