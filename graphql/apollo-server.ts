@@ -8,6 +8,10 @@ import ProductModel from "@/mongoose/models/productModel";
 import CommentModel from "@/mongoose/models/commentModel";
 import LikeModel from "@/mongoose/models/likeModel";
 import OrderModel from "@/mongoose/models/orderModel";
+import DepositModel from "@/mongoose/models/depositModel";
+import WithdrawModel from "@/mongoose/models/withdrawModel";
+import DebitModel from "@/mongoose/models/debitModel";
+import CreditModel from "@/mongoose/models/creditModel";
 import dbConnection from "@/mongoose/mongodb";
 import sendEmail from "../node-mailer";
 import resolvers from "./resolvers";
@@ -37,6 +41,10 @@ const apolloServer = new ApolloServer({
       ProductModel,
       ServiceModel,
       LikeModel,
+      DepositModel,
+      WithdrawModel,
+      DebitModel,
+      CreditModel,
       sendEmail,
     };
   },

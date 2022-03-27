@@ -12,7 +12,7 @@ type JwtPayload = {
   nbf?: number | undefined;
   iat?: number | undefined;
   jti?: string | undefined;
-}
+};
 
 type UserPayloadType = {
   serviceId?: string;
@@ -112,6 +112,17 @@ type CommentType = {
   poster: mongoose.Types.ObjectId;
   post: string;
 } & TimestampAndId;
+
+type DepositOrWithdrawType = {
+  amount: number;
+  user: string | mongoose.Types.ObjectId;
+  aggregate: number;
+} & TimestampAndId;
+
+type CreditOrDebitType = Omit<DepositType, "user"> &
+  Record<"from" | "to", DepositType["user"]> & {
+    type: "purchase" | "transfer";
+  };
 
 type ProductVertexType = Partial<
   Omit<ProductType, "provider"> & {
@@ -228,6 +239,10 @@ type GraphContextType = {
   OrderModel: Model<OrderType>;
   ProductModel: Model<ProductType>;
   LikeModel: Model<LikeType>;
+  DepositModel: Model<DepositOrWithdrawType>;
+  WithdrawModel: Model<DepositOrWithdrawType>;
+  DebitModel: Model<CreditOrDebitType>;
+  CreditModel: Model<CreditOrDebitType>;
   req: NextApiRequest;
   res: NextApiResponse;
   sendEmail: (

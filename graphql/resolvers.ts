@@ -172,7 +172,7 @@ const resolvers = {
                   ).testAccountMessageUrl
                 }`
               ),
-          "Check your email."
+          "Check your email inbox or spam."
         );
       } catch (error) {
         // NOTE: log error to debug
@@ -392,7 +392,7 @@ const resolvers = {
         // clear cookie
         setCookie(res, COOKIE_PASSCODE_TOKEN, "", COOKIE_CLEAR_OPTIONS);
 
-        return `${user?.username} password changed successfully. Login with new password.`;
+        return `${user?.username} password changed successfully. Login with the new password.`;
       } catch (error) {
         devErrorLogger(error);
         handleError(
