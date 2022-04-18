@@ -275,9 +275,9 @@ type UserService {
   "service home state"
   state: String
   "number of likes for the service"
-  likeCount: Int
+  likeCount: Int!
   "number of users who likes the service"
-  happyClients: [ID!]
+  happyClients: [ID!]!
   "list of service products"
   products(args: PagingInput!): ProductConnection!
   "comments from clients"
