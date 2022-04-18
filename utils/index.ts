@@ -11,6 +11,7 @@ import { NextApiResponse } from "next";
 import {
   CursorConnectionArgsType,
   CursorConnectionType,
+  OrderStatsType,
   TokenPairType,
   UserPayloadType,
 } from "types";
@@ -243,3 +244,14 @@ export const getCursorConnection = <
     pageInfo: { startCursor, endCursor, hasPreviousPage, hasNextPage },
   };
 };
+
+export const getOrderItemStats = (orderItems: any[]): OrderStatsType =>
+  orderItems.reduce(
+    (prev, { status }) => ({ ...prev, [status]: ++prev[status] }),
+    {
+      PENDING: 0,
+      CANCELED: 0,
+      SHIPPED: 0,
+      DELIVERED: 0,
+    }
+  );
