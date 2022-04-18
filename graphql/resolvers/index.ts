@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import config from "../config";
+import config from "../../config";
 import type {
   ChangePasswordVariableType,
   CommentType,
@@ -28,7 +28,7 @@ import {
   getHashedPassword,
   handleError,
   setCookie,
-} from "../utils";
+} from "../../utils";
 import {
   AuthenticationError,
   UserInputError,
@@ -550,11 +550,13 @@ const resolvers = {
             ? {
                 $addToSet: { happyClients: sub },
               }
-            : { $pull: { happyClients: sub } }
+            : { $pull: { happyClients: sub } },
+          { upsert: true }
         )
           .select("_id")
           .lean()
           .exec();
+
         return args.isFav;
       } catch (error) {
         // NOTE: log to debug
@@ -752,18 +754,20 @@ const resolvers = {
   UserService: {
     happyClients: async (
       parent: ServiceType,
-      __: any,
+      _: any,
       { LikeModel }: GraphContextType
     ) => {
       try {
         return (
-          await LikeModel.findOne({
-            selection: parent._id,
-          })
-            .select("happyClients")
-            .lean()
-            .exec()
-        )?.happyClients!;
+          (
+            await LikeModel.findOne({
+              selection: parent._id,
+            })
+              .select("happyClients")
+              .lean()
+              .exec()
+          )?.happyClients! ?? []
+        );
       } catch (error) {
         // NOTE: log error to debug
         devErrorLogger(error);
@@ -925,11 +929,13 @@ const resolvers = {
     ) => {
       try {
         return (
-          await LikeModel.findOne({ selection: parent._id })
-            .select("happyClients")
-            .lean()
-            .exec()
-        )?.happyClients.length;
+          (
+            await LikeModel.findOne({ selection: parent._id })
+              .select("happyClients")
+              .lean()
+              .exec()
+          )?.happyClients.length ?? 0
+        );
       } catch (error) {
         // NOTE: log error to debug
         devErrorLogger(error);
