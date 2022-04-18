@@ -10,14 +10,24 @@ import LikeModel from "@/mongoose/models/likeModel";
 import OrderModel from "@/mongoose/models/orderModel";
 import dbConnection from "@/mongoose/mongodb";
 import sendEmail from "../node-mailer";
-import resolvers from "./resolvers";
 import { ApolloServer } from "apollo-server-micro";
 import type { GraphContextType } from "types";
 import typeDefs from "./typeDefs";
+import Query from "./resolvers/query";
+import Mutation from "./resolvers/mutation";
+import User from "./resolvers/user";
+import UserService from "./resolvers/userService";
+import ServiceOrder from "./resolvers/serviceOrder";
 
 const apolloServer = new ApolloServer({
   typeDefs,
-  resolvers,
+  resolvers: {
+    Query,
+    Mutation,
+    User,
+    UserService,
+    ServiceOrder,
+  },
   plugins: [
     process.env.NODE_ENV === "production"
       ? ApolloServerPluginLandingPageDisabled()
