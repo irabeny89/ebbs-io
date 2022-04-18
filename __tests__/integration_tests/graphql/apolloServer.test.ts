@@ -6,8 +6,12 @@ import {
   USER_LOGIN,
 } from "@/graphql/documentNodes";
 import { ApolloServer } from "apollo-server-micro";
-import resolvers from "@/graphql/resolvers";
 import typeDefs from "@/graphql/typeDefs";
+import Query from "@/graphql/resolvers/query";
+import Mutation from "@/graphql/resolvers/mutation";
+import ServiceOrder from "@/graphql/resolvers/serviceOrder";
+import User from "@/graphql/resolvers/user";
+import UserService from "@/graphql/resolvers/userService";
 
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn(() => ({
@@ -23,13 +27,13 @@ jest.mock("@/utils/index", () => ({
   setCookie: jest.fn(),
   getAuthPayload: jest.fn(),
   handleError: jest.fn(),
-  comparePassword: jest.fn().mockReturnValue("accessToken")
+  comparePassword: jest.fn().mockReturnValue("accessToken"),
 }));
 
 describe("Apollo Server", () => {
   const testServer = new ApolloServer({
     typeDefs,
-    resolvers,
+    resolvers: { Query, Mutation, User, UserService, ServiceOrder },
     context: () => ({
       req: {
         cookies: { token: "refreshtoken" },
@@ -105,12 +109,12 @@ describe("Apollo Server", () => {
       query: USER_LOGIN,
       variables: {
         email: "irabeny89@ebbs.com",
-        password: "ebbs2022"
-      }
+        password: "ebbs2022",
+      },
     });
-    
+
     expect(errors).toBeUndefined();
-    expect(data?.login)
+    expect(data?.login);
   });
   // MUTATIONS
   // updateOrderItemStatus mutation
@@ -124,7 +128,7 @@ describe("Apollo Server", () => {
         },
       },
     });
-    
+
     expect(errors).toBeUndefined();
     expect(data?.updateOrderItemStatus.includes("SHIPPED")).toBeTruthy();
     expect(data?.updateOrderItemStatus).not.toBeNull();
@@ -135,11 +139,11 @@ describe("Apollo Server", () => {
       query: SET_ORDER_DELIVERY_DATE,
       variables: {
         orderId: "test_orderId_12345",
-        deliveryDate: "test_deliveryDate"
-      }
-    })
+        deliveryDate: "test_deliveryDate",
+      },
+    });
 
     expect(errors).toBeUndefined();
-    expect(data?.setOrderDeliveryDate).toBeTruthy()
-  })
+    expect(data?.setOrderDeliveryDate).toBeTruthy();
+  });
 });
