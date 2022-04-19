@@ -1,9 +1,4 @@
-import {
-  randomBytes,
-  scrypt,
-  BinaryLike,
-  timingSafeEqual,
-} from "crypto";
+import { randomBytes, scrypt, BinaryLike, timingSafeEqual } from "crypto";
 import { AuthenticationError } from "apollo-server-micro";
 import { promisify } from "util";
 import { serialize, CookieSerializeOptions } from "cookie";
@@ -28,10 +23,11 @@ export const AUTHORIZATION_ERROR_MESSAGE = "Authorization failed";
 
 export const LOGIN_ERROR_MESSAGE = "Enter correct email and password";
 
-export const devErrorLogger = (error: any) =>
-  (console.log("================dev================"),
+export const devErrorLogger = (error: any) => (
+  console.log("================dev================"),
   console.log(error),
-  console.log("===================================="));
+  console.log("====================================")
+);
 
 export const setCookie = (
   res: NextApiResponse,
@@ -209,7 +205,7 @@ export const getCursorConnection = <
     : list;
 
   if (first) {
-    const afterIndex = _list.findIndex((item) => item.createdAt === after);
+    const afterIndex = _list.findIndex((item) => +item.createdAt === +after!);
     // create edges with cursor
     edges = _list.slice(afterIndex + 1, first + afterIndex + 1).map((item) => ({
       cursor: item.createdAt,
@@ -222,7 +218,7 @@ export const getCursorConnection = <
     hasPreviousPage = list.some((item) => item.createdAt < startCursor);
   }
   if (last) {
-    const beforeIndex = _list.findIndex((item) => item.createdAt === before);
+    const beforeIndex = _list.findIndex((item) => +item.createdAt === +before!);
     // create edges with cursor
     edges = _list
       .slice(
