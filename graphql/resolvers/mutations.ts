@@ -195,6 +195,58 @@ const Mutation = {
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
+  editProduct: async (
+    _: any,
+    {
+      args,
+    }: Record<
+      "args",
+      Omit<ProductType, "provider" | "updatedAt" | "createdAt">
+    >,
+    {
+      ProductModel,
+      req: {
+        headers: { authorization },
+      },
+    }: GraphContextType
+  ): Promise<string | undefined> => {
+    try {
+      // validate request auth
+      const { serviceId } = getAuthPayload(authorization!);
+      // throw error if user has no service profile
+      if (!serviceId)
+        throw new ForbiddenError("Create service before adding product!");
+      // throw error if user products is over max allowed
+      if (
+        (
+          await ProductModel.find({
+            provider: serviceId,
+          })
+            .select("_id")
+            .lean()
+            .exec()
+        ).length <= maxProductAllowed
+      ) {
+        // update product & throw error or return id
+        const updatedProduct = await ProductModel.findByIdAndUpdate(args._id, {
+          ...args,
+        })
+          .select("_id")
+          .lean()
+          .exec();
+        handleError(!updatedProduct, UserInputError, "Product not found.");
+
+        return updatedProduct?._id.toString();
+      } else
+        throw new ForbiddenError(
+          "You have maximum products allowed. Kindly upgrade to add more products."
+        );
+    } catch (error: any) {
+      // NOTE: log to debug
+      devErrorLogger(error);      
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
   deleteMyProduct: async (
     _: any,
     { productId }: Record<"productId", string>,
