@@ -1,9 +1,4 @@
-import {
-  devErrorLogger,
-  getAuthPayload,
-  handleError,
-  getCursorConnection,
-} from "utils/";
+import { devErrorLogger, handleError, getCursorConnection } from "utils/";
 import { GraphContextType, PagingInputType, UserType } from "types";
 import config from "config";
 import { AuthenticationError } from "apollo-server-micro";
@@ -48,22 +43,9 @@ const User = {
       handleError(error, Error, generalErrorMessage);
     }
   },
-  service: async (
-    _: any,
-    __: any,
-    {
-      req: {
-        headers: { authorization },
-      },
-      ServiceModel,
-    }: GraphContextType
-  ) => {
+  service: async (parent: any, __: any, { ServiceModel }: GraphContextType) => {
     try {
-      return await ServiceModel.findById(
-        getAuthPayload(authorization!).serviceId
-      )
-        .lean()
-        .exec();
+      return await ServiceModel.findOne({ owner: parent }).lean().exec();
     } catch (error) {
       // NOTE: log to debug
       devErrorLogger(error);

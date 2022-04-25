@@ -42,6 +42,8 @@ type Mutation {
   updateOrderItemStatus(args: OrderItemStatusInput!): String!
   "new product creation"
   newProduct(args: NewProductInput!): String!
+  "edit a product"
+  editProduct(args: EditProductInput!): String!
   "delete product by an authorized user"
   deleteMyProduct(productId: ID!): String!
   "as an authorized user post comment on a service using it id"
@@ -84,6 +86,25 @@ input UserPasswordChangeInput {
 }
 
 input NewProductInput {
+  "The new product name"
+  name: String!
+  "The new product description"
+  description: String!
+  "The new product image(s) web3 content ID"
+  imagesCID: String!
+  "The new product video web3 content ID"
+  videoCID: String
+  "The new product category type"
+  category: CategoryOption!
+  "The new product tag(s)"
+  tags: [String]
+  "The new product price"
+  price: Float!
+}
+
+input EditProductInput {
+  "The product to edit ID"
+  _id: ID!
   "The new product name"
   name: String!
   "The new product description"
@@ -303,7 +324,7 @@ type UserService {
 type ServiceComment {
   _id: ID!
   "the service commented on"
-  topic: UserService!
+  topic: ID!
   "the client who posted the comment"
   poster: User!
   "the comment post"
