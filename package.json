@@ -1,6 +1,6 @@
 {
   "name": "ts-ebs-api",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "private": true,
   "description": "This app serves as an external API to another web app.",
   "scripts": {
