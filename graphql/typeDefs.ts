@@ -48,6 +48,8 @@ type Mutation {
   deleteMyProduct(productId: ID!): String!
   "as an authorized user post comment on a service using it id"
   myCommentPost(serviceId: ID!, post: String!): String!
+  "Delete your comment by passing the comment ID"
+  deleteMyComment(commentId: ID!): String!
   "update service by an authorized user"
   myServiceUpdate(args: MyServiceUpdateInput!): String!
   "set the order delivery date"

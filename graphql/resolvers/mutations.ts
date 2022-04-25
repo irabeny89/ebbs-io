@@ -78,8 +78,11 @@ const Mutation = {
     } catch (error: any) {
       // log error to console
       devErrorLogger(error);
-      error.name === "UserInputError" &&
-        handleError(error, UserInputError, USER_INPUT_ERROR);
+      handleError(
+        error.name === "UserInputError",
+        UserInputError,
+        USER_INPUT_ERROR
+      );
       handleError(error, ApolloError, generalErrorMessage);
     }
   },
@@ -243,7 +246,7 @@ const Mutation = {
         );
     } catch (error: any) {
       // NOTE: log to debug
-      devErrorLogger(error);      
+      devErrorLogger(error);
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
@@ -292,8 +295,42 @@ const Mutation = {
       ]);
       return "Comment posted successfully";
     } catch (error) {
-      // NOTE: log to debug
       devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
+  deleteMyComment: async (
+    _: any,
+    { commentId }: { commentId: string },
+    {
+      req: {
+        headers: { authorization },
+      },
+      CommentModel,
+    }: GraphContextType
+  ) => {
+    try {
+      // check auth
+      const { sub } = getAuthPayload(authorization!);
+      handleError(
+        !(await CommentModel.findOneAndDelete({
+          $and: [{ _id: commentId }, { poster: sub }],
+        })
+          .select("_id")
+          .lean()
+          .exec()),
+        UserInputError,
+        "Wrong inputs- comment id or authorized request. Verify and try again."
+      );
+
+      return `Comment deleted successfully`;
+    } catch (error: any) {
+      devErrorLogger(error);
+      handleError(
+        error.name === "UserInputError",
+        UserInputError,
+        error.message
+      );
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
