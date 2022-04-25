@@ -7,8 +7,8 @@ import {
 } from "@/graphql/documentNodes";
 import { ApolloServer } from "apollo-server-micro";
 import typeDefs from "@/graphql/typeDefs";
-import Query from "@/graphql/resolvers/query";
-import Mutation from "@/graphql/resolvers/mutation";
+import Query from "@/graphql/resolvers/queries";
+import Mutation from "@/graphql/resolvers/mutations";
 import ServiceOrder from "@/graphql/resolvers/serviceOrder";
 import User from "@/graphql/resolvers/user";
 import UserService from "@/graphql/resolvers/userService";
