@@ -119,6 +119,12 @@ type DepositOrWithdrawType = {
   aggregate: number;
 } & TimestampAndId;
 
+type MessageType = {
+  message: string;
+  sender: mongoose.Types.ObjectId | string;
+  receiver: mongoose.Types.ObjectId | string;
+} & TimestampAndId;
+
 type CreditOrDebitType = Omit<DepositType, "user"> &
   Record<"from" | "to", DepositType["user"]> & {
     type: "purchase" | "transfer";
