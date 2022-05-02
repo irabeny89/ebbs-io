@@ -485,16 +485,24 @@ const Mutation = {
       },
     }: GraphContextType
   ) => {
+    const ERROR_MESSAGE = "Cannot send direct message to self."
     try {
       // check permission & get user id
       const { sub: sender } = getAuthPayload(authorization!);
+      // error if sending to self
+      handleError(
+        sender?.toString() === receiver.toString(),
+        UserInputError,
+        ERROR_MESSAGE
+      );
       // create the direct message and store on the database
       await MessageModel.create({ message, sender, receiver });
       // return confirmation string
       return "Direct message sent successfully.";
-    } catch (error) {
+    } catch (error: any) {
       // NOTE: log to debug error
       devErrorLogger(error);
+      handleError(error.name === "UserInputError", UserInputError, ERROR_MESSAGE)
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },

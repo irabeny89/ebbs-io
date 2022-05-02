@@ -57,11 +57,11 @@ export const getHashedPassword = async (password: string) => {
 const asyncScrypt = promisify<BinaryLike, BinaryLike, number, Buffer>(scrypt);
 
 export const handleError = (
-  condition: any,
+  positiveCondition: any,
   ErrorClass: any,
   message: string
 ) => {
-  if (condition) throw new ErrorClass(message);
+  if (positiveCondition) throw new ErrorClass(message);
 };
 // verifies jwt and throw errors
 export const getAuthPayload = (authorization: string) =>
