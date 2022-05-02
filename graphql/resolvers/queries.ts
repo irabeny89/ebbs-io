@@ -286,6 +286,34 @@ const Query = {
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
+  inbox: async (
+    _: any,
+    { args }: Record<"args", PagingInputType>,
+    {
+      req: {
+        headers: { authorization },
+      },
+      MessageModel,
+    }: GraphContextType
+  ) => {
+    try {
+      // authenticate and get id or throw error
+      const { sub } = getAuthPayload(authorization!);
+      // filter direct messages by receiver id i.e target my messages
+      const list = await MessageModel.find({
+        $or: [{ receiver: sub }, { sender: sub }],
+      })
+        .populate("sender")
+        .lean()
+        .exec();
+      // return message connection
+      return getCursorConnection({ list, ...args });
+    } catch (error) {
+      // NOTE: log to debug
+      devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
 };
 
 export default Query;

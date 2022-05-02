@@ -12,6 +12,7 @@ import DepositModel from "@/mongoose/models/depositModel";
 import WithdrawModel from "@/mongoose/models/withdrawModel";
 import DebitModel from "@/mongoose/models/debitModel";
 import CreditModel from "@/mongoose/models/creditModel";
+import MessageModel from "@/mongoose/models/messageModel";
 import dbConnection from "@/mongoose/mongodb";
 import sendEmail from "../node-mailer";
 import { ApolloServer } from "apollo-server-micro";
@@ -55,6 +56,7 @@ const apolloServer = new ApolloServer({
       WithdrawModel,
       DebitModel,
       CreditModel,
+      MessageModel,
       sendEmail,
     };
   },

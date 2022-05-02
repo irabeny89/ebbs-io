@@ -475,6 +475,29 @@ const Mutation = {
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
+  sendMyDirectMessage: async (
+    _: any,
+    { message, receiverId: receiver }: Record<"message" | "receiverId", string>,
+    {
+      MessageModel,
+      req: {
+        headers: { authorization },
+      },
+    }: GraphContextType
+  ) => {
+    try {
+      // check permission & get user id
+      const { sub: sender } = getAuthPayload(authorization!);
+      // create the direct message and store on the database
+      await MessageModel.create({ message, sender, receiver });
+      // return confirmation string
+      return "Direct message sent successfully.";
+    } catch (error) {
+      // NOTE: log to debug error
+      devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
 };
 
 export default Mutation;

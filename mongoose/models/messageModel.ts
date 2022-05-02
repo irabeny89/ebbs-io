@@ -18,5 +18,5 @@ const schema = new Schema<MessageType>({
   },
 });
 
-export default (models.Comment as Model<MessageType, {}, {}>) ||
+export default (models.Message as Model<MessageType, {}, {}>) ||
   model<MessageType>("Message", schema);

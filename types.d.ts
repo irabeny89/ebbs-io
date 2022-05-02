@@ -171,6 +171,10 @@ type OrderVertexType = Partial<Omit<OrderType, "client">> & {
   orderStats: OrderStatsType;
 };
 
+type MessageVertexType = Partial<
+  Omit<MessageType, "sender"> & Record<"sender", UserVertexType>
+>;
+
 type PaginationInfoType = {
   totalPages: number;
   totalItems: number;
@@ -249,6 +253,7 @@ type GraphContextType = {
   WithdrawModel: Model<DepositOrWithdrawType>;
   DebitModel: Model<CreditOrDebitType>;
   CreditModel: Model<CreditOrDebitType>;
+  MessageModel: Model<MessageType>;
   req: NextApiRequest;
   res: NextApiResponse;
   sendEmail: (
