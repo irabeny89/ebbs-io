@@ -33,7 +33,11 @@ type ProductCategoryType =
   | "ELECTRICALS"
   | "VEHICLES"
   | "ELECTRONICS"
-  | "FOOD_DRUGS";
+  | "FOOD_DRUGS"
+  | "PETS"
+  | "SOFTWARES"
+  | "ARTS"
+  | "EDUCATION";
 
 type TimestampAndId = {
   _id: string | mongoose.Types.ObjectId;

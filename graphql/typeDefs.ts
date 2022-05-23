@@ -181,6 +181,7 @@ const typeDefs = gql`
     SOFTWARES
     PETS
     ARTS
+    EDUCATION
   }
 
   enum StatusOptions {

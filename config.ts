@@ -8,7 +8,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
       abbr: "EBBS",
       socialMedia: [{ name: "telegram", link: "https://t.me/ebbs2022" }],
       description:
-        "EBBS - EveryBodyBuySell is a platform for everybody to create and manage their online businesses.",
+        "EBBS - EveryBodyBuySell is an ecommerce web app. It is a platform that connects service providers and consumers.",
       features: [
         "Easy to use dashboard to manage your online business.",
         "Manage your business logistics.",
@@ -32,6 +32,7 @@ const isProductionEnv = process.env.NODE_ENV === "production",
         "SOFTWARES",
         "PETS",
         "ARTS",
+        "EDUCATION"
       ],
       orderStatuses: ["PENDING", "SHIPPED", "DELIVERED", "CANCELED"],
       subscriptionInfos: [
