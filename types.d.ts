@@ -127,7 +127,23 @@ type MessageType = {
   message: string;
   sender: mongoose.Types.ObjectId | string;
   receiver: mongoose.Types.ObjectId | string;
+  isSeen: boolean;
 } & TimestampAndId;
+
+type DirectMessagerType = {
+  _id: string;
+  username: string;
+  unSeenCount: number;
+  isSender: boolean;
+};
+
+type MyMessageType = Omit<MessageType, "receiver"> &
+  Record<"receiver", UserType>;
+
+type InboxMessageType = Omit<MessageType, "sender"> &
+  Record<"sender", UserType>;
+
+type GroupedMessageType = { [k: string]: MyMessageType };
 
 type CreditOrDebitType = Omit<DepositType, "user"> &
   Record<"from" | "to", DepositType["user"]> & {

@@ -28,6 +28,8 @@ const typeDefs = gql`
     "request passcode to change password"
     requestPassCode(email: String!): String!
     inbox(args: PagingInput!): MessageConnection!
+    "list direct messagers(senders or receivers) data"
+    directMessagers: [DirectMessager!]!
   }
   # -- mutation --
   type Mutation {
@@ -302,7 +304,13 @@ const typeDefs = gql`
     "product modification date"
     updatedAt: String!
   }
-
+  # direct messager object type
+  type DirectMessager {
+    _id: ID!
+    username: String!
+    unSeenCount: Int!
+    isSender: Boolean!
+  }
   # direct message object type
   type UserMessage {
     _id: ID!
@@ -313,7 +321,6 @@ const typeDefs = gql`
     "The recipient of the direct message."
     receiver: ID!
   }
-
   # service object type
   type UserService {
     _id: ID

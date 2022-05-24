@@ -1,10 +1,16 @@
 import {
+  DirectMessagerType,
   GraphContextType,
+  GroupedMessageType,
+  InboxMessageType,
   JwtPayload,
+  MessageType,
+  MyMessageType,
   PagingInputType,
   ProductVertexType,
   UserLoginVariableType,
   UserPayloadType,
+  UserType,
 } from "types";
 import config from "config";
 import {
@@ -310,6 +316,78 @@ const Query = {
       return getCursorConnection({ list, ...args });
     } catch (error) {
       // NOTE: log to debug
+      devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
+  directMessagers: async (
+    _: any,
+    __: any,
+    {
+      req: {
+        headers: { authorization },
+      },
+      MessageModel,
+    }: GraphContextType
+  ) => {
+    try {
+      // authenticate and get id or throw error
+      const { sub } = getAuthPayload(authorization!);
+
+      const sentMessages = (await MessageModel.find({ sender: sub })
+        .populate("receiver")
+        .lean()
+        .exec()) as unknown as MyMessageType[];
+
+      const inboxMessages = (await MessageModel.find({ receiver: sub })
+        .populate("sender")
+        .lean()
+        .exec()) as unknown as InboxMessageType[];
+
+      // @ts-ignore
+      const senderMessagers: DirectMessagerType[] = inboxMessages.reduce(
+        // @ts-ignore
+        (oldData: DirectMessagerType[], { sender }, _, sentMessages) =>
+          oldData.find(({ username }) => username === sender.username)
+            ? oldData
+            : [
+                ...oldData,
+                {
+                  _id: sender._id,
+                  username: sender.username,
+                  unSeenCount: sentMessages.filter(
+                    ({ isSeen, sender: { username } }) =>
+                      username === sender.username && isSeen === false
+                  ).length,
+                  isSender: true,
+                },
+              ],
+        []
+      );
+
+      // @ts-ignore
+      const recipientMessagers: DirectMessagerType[] = sentMessages.reduce(
+        // @ts-ignore
+        (oldData: DirectMessagerType[], { receiver }, _, sentMessages) =>
+          oldData.find(({ username }) => username === receiver.username)
+            ? oldData
+            : [
+                ...oldData,
+                {
+                  _id: receiver._id,
+                  username: receiver.username,
+                  unSeenCount: sentMessages.filter(
+                    ({ isSeen, receiver: { username } }) =>
+                      username === receiver.username && isSeen === false
+                  ).length,
+                  isSender: false,
+                },
+              ],
+        []
+      );
+
+      return senderMessagers.concat(recipientMessagers);
+    } catch (error) {
       devErrorLogger(error);
       handleError(error, AuthenticationError, generalErrorMessage);
     }
