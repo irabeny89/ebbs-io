@@ -133,8 +133,8 @@ type MessageType = {
 type DirectMessagerType = {
   _id: string;
   username: string;
-  unSeenCount: number;
-  isSender: boolean;
+  unSeenSentCount: number;
+  unSeenReceivedCount: number;
 };
 
 type MyMessageType = Omit<MessageType, "receiver"> &
@@ -142,8 +142,6 @@ type MyMessageType = Omit<MessageType, "receiver"> &
 
 type InboxMessageType = Omit<MessageType, "sender"> &
   Record<"sender", UserType>;
-
-type GroupedMessageType = { [k: string]: MyMessageType };
 
 type CreditOrDebitType = Omit<DepositType, "user"> &
   Record<"from" | "to", DepositType["user"]> & {

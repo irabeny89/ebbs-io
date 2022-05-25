@@ -1,16 +1,13 @@
 import {
   DirectMessagerType,
   GraphContextType,
-  GroupedMessageType,
   InboxMessageType,
   JwtPayload,
-  MessageType,
   MyMessageType,
   PagingInputType,
   ProductVertexType,
   UserLoginVariableType,
   UserPayloadType,
-  UserType,
 } from "types";
 import config from "config";
 import {
@@ -347,7 +344,7 @@ const Query = {
       // @ts-ignore
       const senderMessagers: DirectMessagerType[] = inboxMessages.reduce(
         // @ts-ignore
-        (oldData: DirectMessagerType[], { sender }, _, sentMessages) =>
+        (oldData: DirectMessagerType[], { sender }, _, inboxMessages) =>
           oldData.find(({ username }) => username === sender.username)
             ? oldData
             : [
@@ -355,11 +352,11 @@ const Query = {
                 {
                   _id: sender._id,
                   username: sender.username,
-                  unSeenCount: sentMessages.filter(
+                  unSeenSentCount: inboxMessages.filter(
                     ({ isSeen, sender: { username } }) =>
                       username === sender.username && isSeen === false
                   ).length,
-                  isSender: true,
+                  unSeenReceivedCount: 0,
                 },
               ],
         []
@@ -376,17 +373,29 @@ const Query = {
                 {
                   _id: receiver._id,
                   username: receiver.username,
-                  unSeenCount: sentMessages.filter(
+                  unSeenSentCount: 0,
+                  unSeenReceivedCount: sentMessages.filter(
                     ({ isSeen, receiver: { username } }) =>
                       username === receiver.username && isSeen === false
                   ).length,
-                  isSender: false,
                 },
               ],
         []
       );
 
-      return senderMessagers.concat(recipientMessagers);
+      return senderMessagers
+        .concat(recipientMessagers)
+        .reduce(
+          (prev: DirectMessagerType[], curr) =>
+            prev.find(({ username }) => curr.username === username)
+              ? prev.map((messager) =>
+                  messager.username === curr.username
+                    ? { ...curr, unSeenSentCount: messager.unSeenSentCount }
+                    : messager
+                )
+              : prev.concat(curr),
+          []
+        );
     } catch (error) {
       devErrorLogger(error);
       handleError(error, AuthenticationError, generalErrorMessage);

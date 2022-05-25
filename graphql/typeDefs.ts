@@ -308,8 +308,8 @@ const typeDefs = gql`
   type DirectMessager {
     _id: ID!
     username: String!
-    unSeenCount: Int!
-    isSender: Boolean!
+    unSeenReceivedCount: Int!
+    unSeenSentCount: Int!
   }
   # direct message object type
   type UserMessage {
