@@ -401,6 +401,34 @@ const Query = {
       handleError(error, AuthenticationError, generalErrorMessage);
     }
   },
+  chatsWith: async (
+    _: any,
+    {
+      userId: sender,
+      args,
+    }: Record<"userId", string> & Record<"args", PagingInputType>,
+    {
+      req: {
+        headers: { authorization },
+      },
+      MessageModel,
+    }: GraphContextType
+  ) => {
+    try {
+      // authenticate and get id or throw error
+      const { sub: receiver } = getAuthPayload(authorization!);
+
+      const chatsWithUser = await MessageModel.find({ receiver, sender })
+        .populate("sender")
+        .lean()
+        .exec();
+
+      return getCursorConnection({ list: chatsWithUser, ...args });
+    } catch (error) {
+      devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
 };
 
 export default Query;

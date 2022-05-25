@@ -30,6 +30,8 @@ const typeDefs = gql`
     inbox(args: PagingInput!): MessageConnection!
     "list direct messagers(senders or receivers) data"
     directMessagers: [DirectMessager!]!
+    "list direct messages with another user"
+    chatsWith(userId: ID!, args: PagingInput!): MessageConnection!
   }
   # -- mutation --
   type Mutation {
@@ -320,6 +322,12 @@ const typeDefs = gql`
     sender: User!
     "The recipient of the direct message."
     receiver: ID!
+    "Flag to indicate when message has been seen."
+    isSeen: Boolean!
+    "Message creation date"
+    createdAt: String
+    "Message modification date"
+    updatedAt: String
   }
   # service object type
   type UserService {
