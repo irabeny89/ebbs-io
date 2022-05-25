@@ -122,7 +122,7 @@ export const createTokenPair = ({
   username,
   serviceId,
   id,
-}: UserPayloadType): TokenPairType => ({
+}: UserPayloadType) => ({
   accessToken: generateToken({ username, serviceId }, jwtAccessSecret, {
     subject: id,
     expiresIn: "20m",
