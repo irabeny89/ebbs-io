@@ -485,7 +485,7 @@ const Mutation = {
       },
     }: GraphContextType
   ) => {
-    const ERROR_MESSAGE = "Cannot send direct message to self."
+    const ERROR_MESSAGE = "Cannot send direct message to self.";
     try {
       // check permission & get user id
       const { sub: sender } = getAuthPayload(authorization!);
@@ -502,8 +502,42 @@ const Mutation = {
     } catch (error: any) {
       // NOTE: log to debug error
       devErrorLogger(error);
-      handleError(error.name === "UserInputError", UserInputError, ERROR_MESSAGE)
+      handleError(
+        error.name === "UserInputError",
+        UserInputError,
+        ERROR_MESSAGE
+      );
       handleError(error, AuthenticationError, generalErrorMessage);
+    }
+  },
+  setSeenDirectMessages: async (
+    _: any,
+    { messageIds }: Record<"messageIds", string[]>,
+    {
+      MessageModel,
+      req: {
+        headers: { authorization },
+      },
+    }: GraphContextType
+  ) => {
+    try {
+      // check permission & get user id
+      getAuthPayload(authorization!);
+
+      const updatedIds = await Promise.all(
+        messageIds.map((id) =>
+          MessageModel.findByIdAndUpdate(id, { $set: { isSeen: true } })
+            .select("_id")
+            .lean()
+            .exec()
+        )
+      );
+
+      return "Updated successfully.";
+    } catch (error: any) {
+      devErrorLogger(error);
+      handleError(error, AuthenticationError, generalErrorMessage);
+      handleError(error.name === "Error", Error, generalErrorMessage);
     }
   },
 };
