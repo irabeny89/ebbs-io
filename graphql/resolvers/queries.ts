@@ -404,7 +404,7 @@ const Query = {
   chatsWith: async (
     _: any,
     {
-      userId: sender,
+      userId,
       args,
     }: Record<"userId", string> & Record<"args", PagingInputType>,
     {
@@ -416,9 +416,14 @@ const Query = {
   ) => {
     try {
       // authenticate and get id or throw error
-      const { sub: receiver } = getAuthPayload(authorization!);
+      const { sub: me } = getAuthPayload(authorization!);
 
-      const chatsWithUser = await MessageModel.find({ receiver, sender })
+      const chatsWithUser = await MessageModel.find({
+        $or: [
+          { receiver: me, sender: userId },
+          { receiver: userId, sender: me },
+        ],
+      })
         .populate("sender")
         .lean()
         .exec();
