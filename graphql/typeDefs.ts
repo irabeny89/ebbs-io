@@ -60,7 +60,7 @@ const typeDefs = gql`
     "Set the order delivery date."
     setOrderDeliveryDate(orderId: ID!, deliveryDate: String!): String!
     "Send a direct message to another user."
-    sendMyDirectMessage(message: String!, receiverId: ID!): String!
+    sendMyDirectMessage(message: String!, receiverId: ID, receiverUsername: String): String!
     "Set the status of seen direct messages."
     setSeenDirectMessages(messageIds: [String]!): String!
   }

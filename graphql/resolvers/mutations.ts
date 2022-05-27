@@ -477,26 +477,49 @@ const Mutation = {
   },
   sendMyDirectMessage: async (
     _: any,
-    { message, receiverId: receiver }: Record<"message" | "receiverId", string>,
+    {
+      message,
+      receiverId,
+      receiverUsername,
+    }: Record<"message" | "receiverId" | "receiverUsername", string>,
     {
       MessageModel,
+      UserModel,
       req: {
         headers: { authorization },
       },
     }: GraphContextType
   ) => {
-    const ERROR_MESSAGE = "Cannot send direct message to self.";
+    const ERROR_MESSAGE =
+      "You cannot send direct message to yourself or username not found on EBBS. Check username properly and retry.";
     try {
       // check permission & get user id
-      const { sub: sender } = getAuthPayload(authorization!);
+      const { sub: sender, username } = getAuthPayload(authorization!);
       // error if sending to self
       handleError(
-        sender?.toString() === receiver.toString(),
+        sender === receiverId || username === receiverUsername,
         UserInputError,
         ERROR_MESSAGE
       );
+
+      const _receiverId = receiverUsername
+        ? (
+            await UserModel.findOne({
+              username: receiverUsername,
+            })
+              .select("_id")
+              .lean()
+              .exec()
+          )?._id.toString()
+        : receiverId;
+      console.log("=====");
+      console.log(_receiverId, receiverUsername);
+      console.log("======");
+      // _receiverId will be undefined if username does not match hence throw
+      handleError(!_receiverId, UserInputError, ERROR_MESSAGE);
       // create the direct message and store on the database
-      await MessageModel.create({ message, sender, receiver });
+      await MessageModel.create({ message, sender, receiver: _receiverId });
+
       // return confirmation string
       return "Direct message sent successfully.";
     } catch (error: any) {
@@ -524,7 +547,7 @@ const Mutation = {
       // check permission & get user id
       getAuthPayload(authorization!);
 
-      const updatedIds = await Promise.all(
+      await Promise.all(
         messageIds.map((id) =>
           MessageModel.findByIdAndUpdate(id, { $set: { isSeen: true } })
             .select("_id")
