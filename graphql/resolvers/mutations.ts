@@ -512,9 +512,7 @@ const Mutation = {
               .exec()
           )?._id.toString()
         : receiverId;
-      console.log("=====");
-      console.log(_receiverId, receiverUsername);
-      console.log("======");
+      
       // _receiverId will be undefined if username does not match hence throw
       handleError(!_receiverId, UserInputError, ERROR_MESSAGE);
       // create the direct message and store on the database
