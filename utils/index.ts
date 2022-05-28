@@ -7,7 +7,6 @@ import {
   CursorConnectionArgsType,
   CursorConnectionType,
   OrderStatsType,
-  TokenPairType,
   UserPayloadType,
 } from "types";
 import { JwtPayload, Secret, sign, SignOptions, verify } from "jsonwebtoken";
