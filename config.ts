@@ -67,7 +67,7 @@ const config = {
     jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
     nodeEnvironment: process.env.NODE_ENV,
     dbUrl:
-      process.env.DB_STATUS === "remote"
+      process.env.DB_STATUS !== "local"
         ? process.env.DB_URL_ATLAS!
         : process.env.DB_URL_COMPASS!,
     origins: [
